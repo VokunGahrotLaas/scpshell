@@ -1,0 +1,6 @@
+[submodule "scplib"]
+	path = scplib
+	url = git@github.com:VokunGahrotLaas/scplib.git
+[submodule "build-your-own-shell"]
+	path = build-your-own-shell
+	url = git@github.com:tokenrove/build-your-own-shell.git
