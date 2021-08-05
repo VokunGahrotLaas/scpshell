@@ -1,5 +1,5 @@
 # scpshell
-A POSIX shell written in C with the scplib \
+A POSIX shell written in C with the scplib. \
 It's purpos is mainly to train my skills in C and test the scplib.
 
 ## Credits
