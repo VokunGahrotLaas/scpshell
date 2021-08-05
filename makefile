@@ -3,6 +3,7 @@ CCFLAGS = -std=gnu2x -O2 -g -Wall -Wextra -Wconversion -Werror
 LDFLAGS = 
 INCLUDES = -I. -I/usr/include -Iscplib
 LIBS = -L/usr/lib
+DEFINES = -DSCPSHELL_INPUT_BUFFER_SIZE=4096
 EXEC = scpshell
 STRICT_EXEC = strict_$(EXEC)
 
