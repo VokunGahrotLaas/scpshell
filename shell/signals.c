@@ -23,8 +23,8 @@ void scpshellSignals_handler(int signo) {
 	}
 }
 
-bool scpshellSignals_sigint_recieved(void) {
-	bool r = _scpshellSignals_sigint_recieved == 1;
+scpBool scpshellSignals_sigint_recieved(void) {
+	scpBool r = _scpshellSignals_sigint_recieved == 1;
 	_scpshellSignals_sigint_recieved = 0;
 	return r;
 }

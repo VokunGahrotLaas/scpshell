@@ -38,7 +38,7 @@ int main(scpAttribute_unused int argc, char** argv, char** envp) {
 			continue;
 		}
 
-		if (scpshellUtils_flush_buffer(stdin, buffer)) {
+		if (scpIO_flush_buffer(stdin, buffer)) {
 			fprintf(stderr, "%s: input was too long to fit in the buffer\n", *argv);
 			continue;
 		}
@@ -50,7 +50,7 @@ int main(scpAttribute_unused int argc, char** argv, char** envp) {
 		char** new_argv = (char**)calloc((new_argc + 1), sizeof(char*));
 
 		scpshellParsing_make_argv(new_argc, new_argv, buffer);
-		char* cmd = scpshellUtils_to_lower(*new_argv);
+		char* cmd = scpString_new_lower(*new_argv);
 		scpshellBuiltins_pair* pair = (scpshellBuiltins_pair*)scpHashMap.search(builtins, cmd);
 
 		if (pair) {

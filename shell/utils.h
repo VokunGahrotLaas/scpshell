@@ -24,7 +24,4 @@
 #define SCPSHELL_INPUT_BUFFER_SIZE 4096
 #endif
 
-char* scpshellUtils_to_lower(const char* str);
-bool scpshellUtils_flush_buffer(FILE* stream, char* buffer);
-
 #endif // SCPSHELL_UTILS_h

@@ -8,14 +8,14 @@ void scpshellParsing_make_argv(size_t argc, char** argv, char* buffer);
 
 size_t scpshellParsing_get_argc(const char* buffer) {
 	size_t count = 1;
-	bool last_was_space = true;
+	scpBool last_was_space = scpTrue;
 	for (; *buffer; ++buffer) {
 		if (*buffer == ' ') {
 			if (!last_was_space)
 				++count;
-			last_was_space = true;
+			last_was_space = scpTrue;
 		} else
-			last_was_space = false;
+			last_was_space = scpFalse;
 	}
 	if (last_was_space && count > 1)
 		--count;

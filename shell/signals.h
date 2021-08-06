@@ -4,6 +4,6 @@
 #include "shell/utils.h"
 
 void scpshellSignals_init(void);
-bool scpshellSignals_sigint_recieved(void);
+scpBool scpshellSignals_sigint_recieved(void);
 
 #endif // SCPSHELL_SIGNALS_H
