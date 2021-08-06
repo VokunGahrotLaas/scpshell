@@ -81,4 +81,4 @@ validate_%: %
 install: $(EXEC)
 	@cp $< /usr/bin/
 
-.PHONY: all clear mrproper run_% debug_% validate_% install
+.PHONY: all clean mrproper run_% debug_% validate_% install

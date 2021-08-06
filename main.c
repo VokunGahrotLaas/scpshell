@@ -33,8 +33,7 @@ int main(scpAttribute_unused int argc, char** argv, char** envp) {
 		fputs("$ ", stdout);
 		fgets(buffer, SCPSHELL_INPUT_BUFFER_SIZE, stdin);
 
-		if (scpshellSignals_sigint_recieved) {
-			scpshellSignals_sigint_recieved = 0;
+		if (scpshellSignals_sigint_recieved()) {
 			fputc('\n', stdout);
 			continue;
 		}
@@ -123,10 +122,8 @@ int main(scpAttribute_unused int argc, char** argv, char** envp) {
 				WTERMSIG(status);
 		}
 
-		if (scpshellSignals_sigint_recieved == 1) {
-			scpshellSignals_sigint_recieved = 0;
+		if (scpshellSignals_sigint_recieved())
 			fputs("proccess was killed\n", stdout);
-		}
 
 		free(cmd);
 		free(new_argv);
