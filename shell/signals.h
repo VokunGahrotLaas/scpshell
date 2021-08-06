@@ -1,9 +1,9 @@
 #ifndef SCPSHELL_SIGNALS_H
 #define SCPSHELL_SIGNALS_H
 
-#include "scpshell/utils.h"
+#include "shell/utils.h"
 
-static volatile sig_atomic_t scpshellSignals_sigint_recieved = 0;
+volatile sig_atomic_t scpshellSignals_sigint_recieved = 0;
 
 void scpshellSignals_init(void);
 static void scpshellSignals_handler(int signo);

@@ -1,9 +1,9 @@
-#include "scpshell/utils.h"
-#include "scpshell/builtins.h"
-#include "scpshell/signals.h"
-#include "scpshell/parsing.h"
+#include "shell/utils.h"
+#include "shell/builtins.h"
+#include "shell/signals.h"
+#include "shell/parsing.h"
 
-int main(scpAttribute_unused int argc, char** argv, char** env) {
+int main(scpAttribute_unused int argc, char** argv, char** envp) {
 	scpshellSignals_init();
 
 	pid_t pid;
@@ -94,7 +94,7 @@ int main(scpAttribute_unused int argc, char** argv, char** env) {
 				for (size_t j = 0; j < old_cmd_len; ++j)
 					cmd[path_len + 1 + j] = old_cmd[j];
 				cmd[path_len + 1 + old_cmd_len] = '\0';
-				execve(cmd, new_argv, env);
+				execve(cmd, new_argv, envp);
 			}
 			fprintf(stderr, "%s: command not found: %s\n", *argv, old_cmd);
 			free(old_cmd);
