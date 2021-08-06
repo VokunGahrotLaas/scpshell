@@ -9,7 +9,7 @@ int main(scpAttribute_unused int argc, char** argv, char** envp) {
 	pid_t pid;
 	int status;
 
-	char* path = strdup(getenv("PATH"));
+	char* path = scpString_strdup(getenv("PATH"));
 	if (!path) SCP_EXCEPTION(scpException_Exception, "no path variable in env");
 	if (*path == '\0') SCP_EXCEPTION(scpException_Exception, "empty path variable in env");
 
@@ -82,7 +82,7 @@ int main(scpAttribute_unused int argc, char** argv, char** envp) {
 						return EXIT_FAILURE;
 				}
 			}
-			char* old_cmd = strdup(*new_argv);
+			char* old_cmd = scpString_strdup(*new_argv);
 			size_t old_cmd_len = strlen(old_cmd);
 			for (size_t i = 0; i < pathc; ++i) {
 				size_t path_len = (size_t)strlen(pathv[i]);
