@@ -1,10 +1,10 @@
 #include "shell/builtins.h"
 
-static int scpshellBuiltins_func_ping(size_t argc, char** argv);
-static int scpshellBuiltins_func_args(size_t argc, char** argv);
-static int scpshellBuiltins_func_exit(size_t argc, char** argv);
-static int scpshellBuiltins_func_cd(size_t argc, char** argv);
-static int scpshellBuiltins_func_shsleep(size_t argc, char** argv);
+static int scpshellBuiltins_func_ping(struct scpshellEnv* env);
+static int scpshellBuiltins_func_args(struct scpshellEnv* env);
+static int scpshellBuiltins_func_exit(struct scpshellEnv* env);
+static int scpshellBuiltins_func_cd(struct scpshellEnv* env);
+static int scpshellBuiltins_func_shsleep(struct scpshellEnv* env);
 
 static scpshellBuiltins_pair scpshellBuiltins_pairs[] = {
 	{ "ping", scpshellBuiltins_func_ping },
@@ -14,45 +14,47 @@ static scpshellBuiltins_pair scpshellBuiltins_pairs[] = {
 	{ "shsleep", scpshellBuiltins_func_shsleep }
 };
 
-struct scpHashMap* scpshellBuiltins_build_hashmap(void) {
-	struct scpHashMap* hashmap = scpHashMap.new(scpHash_stringA, scpHash_stringB, scpCmp_string);
+void scpshellBuiltins_build(struct scpshellEnv* env) {
 	for (size_t i = 0; i < sizeof scpshellBuiltins_pairs / sizeof *scpshellBuiltins_pairs; ++i)
-		scpHashMap.insert(hashmap, scpshellBuiltins_pairs[i].key, scpshellBuiltins_pairs + i);
-	return hashmap;
+		scpHashMap.insert(env->builtins, scpshellBuiltins_pairs[i].key, scpshellBuiltins_pairs + i);
+ }
+
+scpshellBuiltins_pair* scpshellBuiltins_search(struct scpshellEnv* env, char* cmd) {
+	return (scpshellBuiltins_pair*)scpHashMap.search(env->builtins, cmd);
 }
 
-int scpshellBuiltins_func_ping(scpAttribute_unused size_t argc, scpAttribute_unused char** argv) {
+int scpshellBuiltins_func_ping(scpAttribute_unused struct scpshellEnv* env) {
 	fputs("pong!\n", stdout);
 	return EXIT_SUCCESS;
 }
 
-static int scpshellBuiltins_func_args(size_t argc, char** argv) {
-	printf("argc: %zu\n", argc);
+static int scpshellBuiltins_func_args(struct scpshellEnv* env) {
+	printf("argc: %i\n", env->sub_argc);
 	fputs("argv: [", stdout);
-	if (argc > 0)
-		printf(" '%s'", *argv);
-	for (size_t i = 1; i < argc; ++i)
-		printf(", '%s'", argv[i]);
-	if (argc > 0)
+	if (env->sub_argc > 0)
+		printf(" '%s'", *env->sub_argv);
+	for (int i = 1; i < env->sub_argc; ++i)
+		printf(", '%s'", env->sub_argv[i]);
+	if (env->sub_argc > 0)
 		fputc(' ', stdout);
 	fputs("]\n", stdout);
 	return EXIT_SUCCESS;
 }
 
-static int scpshellBuiltins_func_exit(scpAttribute_unused size_t argc, scpAttribute_unused char** argv) {
+static int scpshellBuiltins_func_exit(scpAttribute_unused struct scpshellEnv* env) {
 	exit(EXIT_SUCCESS);
 }
 
-static int scpshellBuiltins_func_cd(size_t argc, char** argv) {
-	if (argc < 2) {
+static int scpshellBuiltins_func_cd(struct scpshellEnv* env) {
+	if (env->sub_argc < 2) {
 		fputs("cd: not yet dude\n", stdout);
 		return EXIT_SUCCESS;
 	}
-	if (argc > 2) {
+	if (env->sub_argc > 2) {
 		fputs("cd: too many arguments\n", stdout);
 		return EXIT_FAILURE;
 	}
-	if (chdir(argv[1]) == 0)
+	if (chdir(env->sub_argv[1]) == 0)
 		return EXIT_SUCCESS;
 	switch (errno) {
 		case EINTR:
@@ -67,10 +69,10 @@ static int scpshellBuiltins_func_cd(size_t argc, char** argv) {
 			fputs("cd: path is too large (PATH_MAX: "SCP_TO_STRING(PATH_MAX)")\n", stderr);
 			break;
 		case ENOENT:
-			fprintf(stderr, "cd: no such file or directory: %s\n", argv[1]);
+			fprintf(stderr, "cd: no such file or directory: %s\n", env->sub_argv[1]);
 			break;
 		case ENOTDIR:
-			fprintf(stderr, "cd: not a directory: %s\n", argv[1]);
+			fprintf(stderr, "cd: not a directory: %s\n", env->sub_argv[1]);
 			break;
 		default:
 			fputs("cd: unknown error\n", stderr);
@@ -79,15 +81,15 @@ static int scpshellBuiltins_func_cd(size_t argc, char** argv) {
 	return errno;
 }
 
-static int scpshellBuiltins_func_shsleep(size_t argc, char** argv) {
-	if (argc < 2) {
+static int scpshellBuiltins_func_shsleep(struct scpshellEnv* env) {
+	if (env->sub_argc < 2) {
 		fputs("sleep: too few arguments\n", stdout);
 		return EXIT_FAILURE;
 	}
-	for (size_t i = 1; i < argc; ++i) {
+	for (int i = 1; i < env->sub_argc; ++i) {
 		unsigned to_sleep;
-		if (sscanf(argv[i], "%u", &to_sleep) != 1) {
-			fprintf(stderr, "sleep: invalid argument: %s", argv[i]);
+		if (sscanf(env->sub_argv[i], "%u", &to_sleep) != 1) {
+			fprintf(stderr, "sleep: invalid argument: %s", env->sub_argv[i]);
 			return EXIT_FAILURE;
 		}
 		if (sleep(to_sleep) != 0)

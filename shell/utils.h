@@ -24,15 +24,30 @@
 #define SCPSHELL_INPUT_BUFFER_SIZE 4096
 #endif
 
-typedef struct scpshellEnv {
+struct scpshellEnvType;
+
+struct scpshellEnv {
 	// main args
 	int argc;
 	char** argv;
 	char** envp;
+	// sub args
+	int sub_argc;
+	char** sub_argv;
+	char** sub_envp;
 	// path
 	char* path;
 	char** pathv;
 	int pathc;
-} scpshellEnv;
+	// builtins
+	struct scpHashMap* builtins;
+};
+
+typedef int (*scpshellBuiltins_func)(struct scpshellEnv* env);
+
+typedef struct scpshellBuiltins_pair {
+	const char* key;
+	const scpshellBuiltins_func value;
+} scpshellBuiltins_pair;
 
 #endif // SCPSHELL_UTILS_h

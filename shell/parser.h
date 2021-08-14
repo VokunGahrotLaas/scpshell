@@ -3,7 +3,7 @@
 
 #include "shell/utils.h"
 
-size_t scpshellParsing_get_argc(const char* str);
-void scpshellParsing_make_argv(size_t argc, char** argv, char* buffer);
+int scpshellParsing_get_argc(const char* str);
+void scpshellParsing_make_argv(int argc, char** argv, char* buffer);
 
 #endif // SCPSHELL_PARSER_H

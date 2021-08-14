@@ -1,7 +1,7 @@
 #include "shell/parser.h"
 
-size_t scpshellParsing_get_argc(const char* buffer) {
-	size_t count = 1;
+int scpshellParsing_get_argc(const char* buffer) {
+	int count = 1;
 	scpBool last_was_space = scpTrue;
 	for (; *buffer; ++buffer) {
 		if (*buffer == ' ') {
@@ -16,9 +16,9 @@ size_t scpshellParsing_get_argc(const char* buffer) {
 	return count;
 }
 
-void scpshellParsing_make_argv(size_t argc, char** argv, char* buffer) {
+void scpshellParsing_make_argv(int argc, char** argv, char* buffer) {
 	for (; *buffer == ' '; ++buffer);
-	for (size_t i = 0; i < argc; ++i) {
+	for (int i = 0; i < argc; ++i) {
 		argv[i] = buffer;
 		for (; *buffer && *buffer != ' '; ++buffer);
 		if (!*buffer) break;

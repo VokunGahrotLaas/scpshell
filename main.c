@@ -6,27 +6,10 @@
 
 int main(int argc, char** argv, char** envp) {
 	scpshellSignals_init();
+	struct scpshellEnv* env = scpshellEnv_new(argc, argv, envp);
 
 	pid_t pid;
 	int status;
-
-	char* path = scpString_strdup(getenv("PATH"));
-	if (!path) SCP_EXCEPTION(scpException_Exception, "no path variable in env");
-	if (*path == '\0') SCP_EXCEPTION(scpException_Exception, "empty path variable in env");
-
-	char** pathv = (char**)calloc(2, sizeof(char*));
-	*pathv = path;
-	size_t pathc = 1;
-	for (size_t i = 0; path[i]; ++i) {
-		if (path[i] == ':') {
-			pathv = (char**)realloc(pathv, (++pathc + 1) * sizeof(char*));
-			pathv[pathc - 1] = path + i + 1;
-			pathv[pathc] = NULL;
-			path[i] = '\0';
-		}
-	}
-
-	struct scpHashMap* builtins = scpshellBuiltins_build_hashmap();
 
 	char buffer[SCPSHELL_INPUT_BUFFER_SIZE];
 
@@ -47,19 +30,19 @@ int main(int argc, char** argv, char** envp) {
 		if (*buffer == '\0')
 			continue;
 
-		size_t new_argc = scpshellParsing_get_argc(buffer);
-		char** new_argv = (char**)calloc((new_argc + 1), sizeof(char*));
+		env->sub_argc = scpshellParsing_get_argc(buffer);
+		env->sub_argv = (char**)calloc((size_t)env->sub_argc + 1, sizeof(char*));
 
-		scpshellParsing_make_argv(new_argc, new_argv, buffer);
-		char* cmd = scpString_new_lower(*new_argv);
-		scpshellBuiltins_pair* pair = (scpshellBuiltins_pair*)scpHashMap.search(builtins, cmd);
+		scpshellParsing_make_argv(env->sub_argc, env->sub_argv, buffer);
+		char* cmd = scpString_new_lower(*env->sub_argv);
+		scpshellBuiltins_pair* pair = scpshellBuiltins_search(env, cmd);
 
 		if (pair) {
-			status = pair->value(new_argc, new_argv);
+			status = pair->value(env);
 			if (status)
 				printf("proccess exited with code %i\n", status);
 		} else if ((pid = fork()) == 0) {
-			if (execve(*new_argv, new_argv, __environ) == -1) {
+			if (execve(*env->sub_argv, env->sub_argv, env->sub_envp) == -1) {
 				switch (errno) {
 					case EINVAL:
 					case EACCES:
@@ -79,22 +62,22 @@ int main(int argc, char** argv, char** envp) {
 						fprintf(stderr, "%s: out of memory\n", *argv);
 						return EXIT_FAILURE;
 					default:
-						fprintf(stderr, "%s: unknown error: %s\n", *argv, *new_argv);
+						fprintf(stderr, "%s: unknown error: %s\n", *argv, *env->sub_argv);
 						return EXIT_FAILURE;
 				}
 			}
-			char* old_cmd = scpString_strdup(*new_argv);
+			char* old_cmd = scpString_strdup(*env->sub_argv);
 			size_t old_cmd_len = strlen(old_cmd);
-			for (size_t i = 0; i < pathc; ++i) {
-				size_t path_len = (size_t)strlen(pathv[i]);
+			for (int i = 0; i < env->pathc; ++i) {
+				size_t path_len = (size_t)strlen(env->pathv[i]);
 				cmd = realloc(cmd, (path_len + old_cmd_len + 2) * sizeof(char));
 				for (size_t j = 0; j < path_len; ++j)
-					cmd[j] = pathv[i][j];
+					cmd[j] = env->pathv[i][j];
 				cmd[path_len] = '/';
 				for (size_t j = 0; j < old_cmd_len; ++j)
 					cmd[path_len + 1 + j] = old_cmd[j];
 				cmd[path_len + 1 + old_cmd_len] = '\0';
-				execve(cmd, new_argv, envp);
+				execve(cmd, env->sub_argv, env->sub_envp);
 			}
 			fprintf(stderr, "%s: command not found: %s\n", *argv, old_cmd);
 			free(old_cmd);
@@ -127,10 +110,9 @@ int main(int argc, char** argv, char** envp) {
 			fputs("proccess was killed\n", stdout);
 
 		free(cmd);
-		free(new_argv);
+		free(env->sub_argv);
 	}
 
-	scpHashMap.delete(builtins);
-	free(path);
+	scpshellEnv_delete(env);
 	return EXIT_SUCCESS;
 }
