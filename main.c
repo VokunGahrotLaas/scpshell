@@ -1,9 +1,10 @@
 #include "shell/utils.h"
 #include "shell/builtins.h"
 #include "shell/signals.h"
-#include "shell/parsing.h"
+#include "shell/parser.h"
+#include "shell/env.h"
 
-int main(scpAttribute_unused int argc, char** argv, char** envp) {
+int main(int argc, char** argv, char** envp) {
 	scpshellSignals_init();
 
 	pid_t pid;

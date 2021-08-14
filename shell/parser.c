@@ -1,10 +1,4 @@
-#ifndef SCPSHELL_PARSING_H
-#define SCPSHELL_PARSING_H
-
-#include "shell/utils.h"
-
-size_t scpshellParsing_get_argc(const char* str);
-void scpshellParsing_make_argv(size_t argc, char** argv, char* buffer);
+#include "shell/parser.h"
 
 size_t scpshellParsing_get_argc(const char* buffer) {
 	size_t count = 1;
@@ -33,5 +27,3 @@ void scpshellParsing_make_argv(size_t argc, char** argv, char* buffer) {
 	}
 	argv[argc] = NULL;
 }
-
-#endif // SCPSHELL_PARSING_H
